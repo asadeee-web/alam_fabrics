@@ -87,13 +87,13 @@ class MainWrapper extends StatelessWidget {
                     Icons.point_of_sale_rounded,
                     'Sales',
                   ),
-                  _buildNavItem(
-                    context,
-                    viewModel,
-                    3,
-                    Icons.assessment_rounded,
-                    'Reports',
-                  ),
+                  // _buildNavItem(
+                  //   context,
+                  //   viewModel,
+                  //   3,
+                  //   Icons.assessment_rounded,
+                  //   'Reports',
+                  // ),
                   const Spacer(),
                   Padding(
                     padding: const EdgeInsets.all(24.0),
