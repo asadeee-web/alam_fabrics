@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "405687784887",
+    "project_id": "alam-fabrics",
+    "storage_bucket": "alam-fabrics.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:405687784887:android:5116ec3bbeb905f67ac432",
+        "android_client_info": {
+          "package_name": "com.example.alam_fabrics"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB05BQrUbjYna5mxELnd8E6EqQ_UJokKns"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
