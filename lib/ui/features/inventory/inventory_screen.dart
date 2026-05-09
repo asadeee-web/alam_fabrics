@@ -73,7 +73,7 @@ class InventoryScreen extends StatelessWidget {
                   TextField(
                     controller: serialController,
                     decoration: InputDecoration(
-                      labelText: 'Serial / Meter',
+                      labelText: 'Serial No',
                       prefixIcon: const Icon(Icons.qr_code_rounded),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -313,16 +313,18 @@ class InventoryScreen extends StatelessWidget {
                               ],
                             ),
 
-                            ElevatedButton.icon(
-                              onPressed: () => _showProductDialog(context),
-                              icon: const Icon(Icons.add_rounded),
-                              label: const Text('ADD NEW STOCK'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF6366F1),
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 24,
-                                  vertical: 18,
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed: () => _showProductDialog(context),
+                                icon: const Icon(Icons.add_rounded),
+                                label: const Text('ADD NEW STOCK'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF6366F1),
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 24,
+                                    vertical: 18,
+                                  ),
                                 ),
                               ),
                             ),
