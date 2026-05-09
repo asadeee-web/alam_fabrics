@@ -184,14 +184,14 @@ class MainWrapper extends StatelessWidget {
                   ),
                   label: 'Sales',
                 ),
-                NavigationDestination(
-                  icon: Icon(Icons.assessment_outlined),
-                  selectedIcon: Icon(
-                    Icons.assessment_rounded,
-                    color: Color(0xFF6366F1),
-                  ),
-                  label: 'Reports',
-                ),
+                // NavigationDestination(
+                //   icon: Icon(Icons.assessment_outlined),
+                //   selectedIcon: Icon(
+                //     Icons.assessment_rounded,
+                //     color: Color(0xFF6366F1),
+                //   ),
+                //   label: 'Reports',
+                // ),
               ],
             )
           : null,

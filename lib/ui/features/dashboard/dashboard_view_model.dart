@@ -7,7 +7,8 @@ class DashboardViewModel extends ChangeNotifier {
 
   DashboardViewModel(this._dbService);
 
-  Stream<Map<String, dynamic>> get statsStream => _dbService.getDashboardStats();
+  Stream<Map<String, dynamic>> get statsStream =>
+      _dbService.getDashboardStats();
 
   Stream<List<Product>> get lowStockProducts {
     return _dbService.getProducts().map((products) {

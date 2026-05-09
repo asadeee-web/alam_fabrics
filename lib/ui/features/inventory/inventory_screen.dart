@@ -436,6 +436,8 @@ class InventoryScreen extends StatelessWidget {
                                 trailing: ConstrainedBox(
                                   constraints: BoxConstraints(
                                     maxWidth: isMobile ? 90 : 120,
+                                    minWidth: 50,
+                                    minHeight: 40,
                                   ),
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,

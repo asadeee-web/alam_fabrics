@@ -37,58 +37,55 @@ class DashboardScreen extends StatelessWidget {
                 return const Center(child: CircularProgressIndicator());
               }
               final stats = snapshot.data ?? {};
-              return LayoutBuilder(
-                builder: (context, constraints) {
-                  final cols = constraints.maxWidth > 1200
-                      ? 3
-                      : (constraints.maxWidth > 700 ? 2 : 1);
-                  return GridView.count(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    crossAxisCount: cols,
-                    crossAxisSpacing: 20,
-                    mainAxisSpacing: 20,
-                    childAspectRatio: 2.2,
-                    children: [
-                      _buildStatCard(
-                        'Total Sales',
-                        'Rs.${(stats['totalSales'] ?? 0).toStringAsFixed(0)}',
-                        Icons.payments_rounded,
-                        const [Color(0xFF6366F1), Color(0xFF4338CA)],
-                      ),
-                      _buildStatCard(
-                        'Total Profit',
-                        'Rs.${(stats['totalProfit'] ?? 0).toStringAsFixed(0)}',
-                        Icons.trending_up_rounded,
-                        const [Color(0xFF10B981), Color(0xFF059669)],
-                      ),
-                      _buildStatCard(
-                        'Inventory Value',
-                        'Rs.${(stats['totalInventoryValue'] ?? 0).toStringAsFixed(0)}',
-                        Icons.inventory_2_rounded,
-                        const [Color(0xFFF59E0B), Color(0xFFD97706)],
-                      ),
-                      _buildStatCard(
-                        'Today\'s Sales',
-                        'Rs.${(stats['todaySales'] ?? 0).toStringAsFixed(0)}',
-                        Icons.today_rounded,
-                        const [Color(0xFF8B5CF6), Color(0xFF7C3AED)],
-                      ),
-                      _buildStatCard(
-                        'Total Products',
-                        '${stats['totalProducts'] ?? 0}',
-                        Icons.shopping_bag_rounded,
-                        const [Color(0xFFEC4899), Color(0xFFDB2777)],
-                      ),
-                      _buildStatCard(
-                        'Low Stock Alerts',
-                        '${stats['lowStockCount'] ?? 0}',
-                        Icons.warning_amber_rounded,
-                        const [Color(0xFFEF4444), Color(0xFFDC2626)],
-                      ),
-                    ],
-                  );
-                },
+              final screenWidth = MediaQuery.of(context).size.width;
+              final cols = screenWidth > 1200
+                  ? 3
+                  : (screenWidth > 700 ? 2 : 1);
+              return GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: cols,
+                crossAxisSpacing: 20,
+                mainAxisSpacing: 20,
+                childAspectRatio: 2.2,
+                children: [
+                  _buildStatCard(
+                    'Total Sales',
+                    'Rs.${(stats['totalSales'] ?? 0).toStringAsFixed(0)}',
+                    Icons.payments_rounded,
+                    const [Color(0xFF6366F1), Color(0xFF4338CA)],
+                  ),
+                  _buildStatCard(
+                    'Total Profit',
+                    'Rs.${(stats['totalProfit'] ?? 0).toStringAsFixed(0)}',
+                    Icons.trending_up_rounded,
+                    const [Color(0xFF10B981), Color(0xFF059669)],
+                  ),
+                  _buildStatCard(
+                    'Inventory Value',
+                    'Rs.${(stats['totalInventoryValue'] ?? 0).toStringAsFixed(0)}',
+                    Icons.inventory_2_rounded,
+                    const [Color(0xFFF59E0B), Color(0xFFD97706)],
+                  ),
+                  _buildStatCard(
+                    'Today\'s Sales',
+                    'Rs.${(stats['todaySales'] ?? 0).toStringAsFixed(0)}',
+                    Icons.today_rounded,
+                    const [Color(0xFF8B5CF6), Color(0xFF7C3AED)],
+                  ),
+                  _buildStatCard(
+                    'Total Products',
+                    '${stats['totalProducts'] ?? 0}',
+                    Icons.shopping_bag_rounded,
+                    const [Color(0xFFEC4899), Color(0xFFDB2777)],
+                  ),
+                  _buildStatCard(
+                    'Low Stock Alerts',
+                    '${stats['lowStockCount'] ?? 0}',
+                    Icons.warning_amber_rounded,
+                    const [Color(0xFFEF4444), Color(0xFFDC2626)],
+                  ),
+                ],
               );
             },
           ),

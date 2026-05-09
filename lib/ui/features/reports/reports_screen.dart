@@ -10,6 +10,7 @@ class ReportsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final viewModel = Provider.of<ReportsViewModel>(context);
+    final screenWidth = MediaQuery.of(context).size.width;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(32),
@@ -78,54 +79,52 @@ class ReportsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 32),
 
+
+          
           // ── Stats Cards ─────────────────────────────────────────
           StreamBuilder<Map<String, dynamic>>(
             stream: viewModel.statsStream,
             builder: (context, snapshot) {
               final stats = snapshot.data ?? {};
-              return LayoutBuilder(
-                builder: (context, constraints) {
-                  final cols = constraints.maxWidth > 900
-                      ? 3
-                      : (constraints.maxWidth > 550 ? 2 : 1);
-                  return GridView.count(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    crossAxisCount: cols,
-                    crossAxisSpacing: 20,
-                    mainAxisSpacing: 20,
-                    childAspectRatio: 2.8,
-                    children: [
-                      _buildStatCard(
-                        'Total Revenue',
-                        'Rs.${(stats['totalSales'] ?? 0).toStringAsFixed(0)}',
-                        Icons.account_balance_wallet_rounded,
-                        Colors.indigo,
-                      ),
-                      _buildStatCard(
-                        'Net Profit',
-                        'Rs.${(stats['totalProfit'] ?? 0).toStringAsFixed(0)}',
-                        Icons.show_chart_rounded,
-                        const Color(0xFF10B981),
-                      ),
-                      _buildStatCard(
-                        'Inventory Value',
-                        'Rs.${(stats['totalInventoryValue'] ?? 0).toStringAsFixed(0)}',
-                        Icons.inventory_rounded,
-                        Colors.orange,
-                      ),
-                    ],
-                  );
-                },
+              final cols = screenWidth > 900
+                  ? 3
+                  : (screenWidth > 550 ? 2 : 1);
+              return GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: cols,
+                crossAxisSpacing: 20,
+                mainAxisSpacing: 20,
+                childAspectRatio: 2.8,
+                children: [
+                  _buildStatCard(
+                    'Total Revenue',
+                    'Rs.${(stats['totalSales'] ?? 0).toStringAsFixed(0)}',
+                    Icons.account_balance_wallet_rounded,
+                    Colors.indigo,
+                  ),
+                  _buildStatCard(
+                    'Net Profit',
+                    'Rs.${(stats['totalProfit'] ?? 0).toStringAsFixed(0)}',
+                    Icons.show_chart_rounded,
+                    const Color(0xFF10B981),
+                  ),
+                  _buildStatCard(
+                    'Inventory Value',
+                    'Rs.${(stats['totalInventoryValue'] ?? 0).toStringAsFixed(0)}',
+                    Icons.inventory_rounded,
+                    Colors.orange,
+                  ),
+                ],
               );
             },
           ),
           const SizedBox(height: 32),
 
           // ── Top Brands + Monthly Goal ────────────────────────────
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final isWide = constraints.maxWidth > 900;
+          Builder(
+            builder: (context) {
+              final isWide = screenWidth > 900;
               if (isWide) {
                 return Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
