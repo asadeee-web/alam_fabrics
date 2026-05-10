@@ -169,6 +169,51 @@ class InventoryScreen extends StatelessWidget {
 
                   const SizedBox(height: 24),
 
+                  if (product != null) ...[
+                    SizedBox(
+                      width: double.infinity,
+                      child: TextButton.icon(
+                        onPressed: () async {
+                          final confirm = await showDialog<bool>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Delete Product'),
+                              content: Text(
+                                'Are you sure you want to delete ${product.brandName}? This action cannot be undone.',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context, false),
+                                  child: const Text('Cancel'),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context, true),
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: Colors.red,
+                                  ),
+                                  child: const Text('Delete'),
+                                ),
+                              ],
+                            ),
+                          );
+
+                          if (confirm == true) {
+                            await viewModel.deleteProduct(product.id);
+                            if (context.mounted) {
+                              Navigator.pop(context);
+                            }
+                          }
+                        },
+                        icon: const Icon(Icons.delete_outline, color: Colors.red),
+                        label: const Text(
+                          'Delete Product',
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+
                   Row(
                     children: [
                       Expanded(
@@ -290,41 +335,34 @@ class InventoryScreen extends StatelessWidget {
                             ),
                           ],
                         )
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Inventory Management',
-                                  style: TextStyle(
-                                    fontSize: 30,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-
-                                const SizedBox(height: 6),
-
-                                Text(
-                                  'Manage your stock and inventory.',
-                                  style: TextStyle(color: Colors.grey.shade600),
-                                ),
-                              ],
+                            const Text(
+                              'Inventory Management',
+                              style: TextStyle(
+                                fontSize: 30,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
 
-                            Expanded(
-                              child: ElevatedButton.icon(
-                                onPressed: () => _showProductDialog(context),
-                                icon: const Icon(Icons.add_rounded),
-                                label: const Text('ADD NEW STOCK'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF6366F1),
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 24,
-                                    vertical: 18,
-                                  ),
+                            const SizedBox(height: 6),
+
+                            Text(
+                              'Manage your stock and inventory.',
+                              style: TextStyle(color: Colors.grey.shade600),
+                            ),
+                            SizedBox(height: 20),
+                            ElevatedButton.icon(
+                              onPressed: () => _showProductDialog(context),
+                              icon: const Icon(Icons.add_rounded),
+                              label: const Text('ADD NEW STOCK'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF6366F1),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                  vertical: 18,
                                 ),
                               ),
                             ),
@@ -435,33 +473,68 @@ class InventoryScreen extends StatelessWidget {
                                   overflow: TextOverflow.ellipsis,
                                 ),
 
-                                trailing: ConstrainedBox(
-                                  constraints: BoxConstraints(
-                                    maxWidth: isMobile ? 90 : 120,
-                                    minWidth: 50,
-                                    minHeight: 40,
-                                  ),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Text(
-                                        '${p.quantity}',
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: [
+                                        Text(
+                                          '${p.quantity}',
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
-                                      ),
+                                        Text(
+                                          'Rs ${p.sellingPrice.toStringAsFixed(0)}',
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            color: Color(0xFF6366F1),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(width: 8),
+                                    IconButton(
+                                      icon: const Icon(Icons.delete_outline,
+                                          color: Colors.red, size: 20),
+                                      onPressed: () async {
+                                        final confirm = await showDialog<bool>(
+                                          context: context,
+                                          builder: (context) => AlertDialog(
+                                            title: const Text('Delete Product'),
+                                            content: Text(
+                                              'Are you sure you want to delete ${p.brandName}? This action cannot be undone.',
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () =>
+                                                    Navigator.pop(
+                                                        context, false),
+                                                child: const Text('Cancel'),
+                                              ),
+                                              TextButton(
+                                                onPressed: () =>
+                                                    Navigator.pop(
+                                                        context, true),
+                                                style: TextButton.styleFrom(
+                                                  foregroundColor: Colors.red,
+                                                ),
+                                                child: const Text('Delete'),
+                                              ),
+                                            ],
+                                          ),
+                                        );
 
-                                      Text(
-                                        'Rs ${p.sellingPrice.toStringAsFixed(0)}',
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          color: Color(0xFF6366F1),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                        if (confirm == true) {
+                                          await viewModel.deleteProduct(p.id);
+                                        }
+                                      },
+                                    ),
+                                  ],
                                 ),
 
                                 onTap: () =>

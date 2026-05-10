@@ -30,11 +30,11 @@ class MainWrapper extends StatelessWidget {
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         title: Text(
-          'Alam Fabrics',
+          'Alam&sons fabrics shop',
           style: TextStyle(
             color: Theme.of(context).colorScheme.primary,
             fontWeight: FontWeight.w900,
-            fontSize: 24,
+            fontSize: 22,
             letterSpacing: -1,
           ),
         ),

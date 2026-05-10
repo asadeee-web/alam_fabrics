@@ -17,6 +17,22 @@ class SalesViewModel extends ChangeNotifier {
   final TextEditingController quantityController = TextEditingController();
   final TextEditingController customerController = TextEditingController();
 
+  DateTime? _filterDate;
+  DateTime? get filterDate => _filterDate;
+
+  DateTime _saleDate = DateTime.now();
+  DateTime get saleDate => _saleDate;
+
+  void setFilterDate(DateTime? date) {
+    _filterDate = date;
+    notifyListeners();
+  }
+
+  void setSaleDate(DateTime date) {
+    _saleDate = date;
+    notifyListeners();
+  }
+
   void setSelectedProduct(Product? product) {
     _selectedProduct = product;
     notifyListeners();
@@ -27,7 +43,17 @@ class SalesViewModel extends ChangeNotifier {
   }
 
   Stream<List<Product>> get productsStream => _dbService.getProducts();
-  Stream<List<Sale>> get salesStream => _dbService.getSales();
+
+  Stream<List<Sale>> get salesStream {
+    return _dbService.getSales().map((sales) {
+      if (_filterDate == null) return sales;
+      return sales.where((sale) {
+        return sale.timestamp.year == _filterDate!.year &&
+            sale.timestamp.month == _filterDate!.month &&
+            sale.timestamp.day == _filterDate!.day;
+      }).toList();
+    });
+  }
 
   Future<String?> recordSale() async {
     if (_selectedProduct == null) return 'Please select a product';
@@ -43,6 +69,7 @@ class SalesViewModel extends ChangeNotifier {
       customerName: customerController.text.trim().isEmpty
           ? null
           : customerController.text.trim(),
+      customDate: _saleDate,
     );
 
     _isProcessing = false;
@@ -50,9 +77,14 @@ class SalesViewModel extends ChangeNotifier {
       quantityController.clear();
       customerController.clear();
       _selectedProduct = null;
+      _saleDate = DateTime.now();
     }
     notifyListeners();
     return error;
+  }
+
+  Future<String?> deleteSale(Sale sale) async {
+    return await _dbService.deleteSale(sale);
   }
 
   @override

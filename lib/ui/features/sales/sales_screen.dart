@@ -51,7 +51,7 @@ class SalesScreen extends StatelessWidget {
 
   // ── New Sale Form ──────────────────────────────────────────────
   Widget _buildSaleForm(BuildContext context, SalesViewModel viewModel) {
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(32),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -87,10 +87,6 @@ class SalesScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Customer (Optional)',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: viewModel.customerController,
@@ -100,6 +96,36 @@ class SalesScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 20),
+                Row(
+                  children: [
+                    const Text(
+                      'Sale Date',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                    ),
+                    const Spacer(),
+                    TextButton.icon(
+                      onPressed: () async {
+                        final date = await showDatePicker(
+                          context: context,
+                          initialDate: viewModel.saleDate,
+                          firstDate: DateTime(2020),
+                          lastDate: DateTime.now(),
+                        );
+                        if (date != null) {
+                          viewModel.setSaleDate(date);
+                        }
+                      },
+                      icon: const Icon(Icons.calendar_today_rounded, size: 18),
+                      label: Text(
+                        DateFormat('MMM dd, yyyy').format(viewModel.saleDate),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
                 const Text(
                   'Select Product',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
@@ -244,225 +270,374 @@ class SalesScreen extends StatelessWidget {
       ),
     );
   }
+}
 
-  // ── Desktop Sales History (uses Expanded via parent Row) ────────
-  Widget _buildSalesHistory(BuildContext context, SalesViewModel viewModel) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 32, 32, 32),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Recent Sales',
-                style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.w900,
-                  color: Colors.grey.shade900,
-                ),
-              ),
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.file_download_outlined),
-                tooltip: 'Export CSV',
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Latest transactions history.',
-            style: TextStyle(color: Colors.grey.shade600),
-          ),
-          const SizedBox(height: 24),
-          Expanded(child: _buildSalesList(context, viewModel)),
-        ],
-      ),
-    );
-  }
-
-  // ── Mobile Sales History (no Expanded, uses shrinkWrap) ────────
-  Widget _buildSalesHistoryMobile(
-    BuildContext context,
-    SalesViewModel viewModel,
-  ) {
-    return Column(
+// ── Desktop Sales History (uses Expanded via parent Row) ────────
+Widget _buildSalesHistory(BuildContext context, SalesViewModel viewModel) {
+  return Padding(
+    padding: const EdgeInsets.fromLTRB(0, 32, 32, 32),
+    child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Recent Sales',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900),
-        ),
-        const SizedBox(height: 16),
-        StreamBuilder<List<Sale>>(
-          stream: viewModel.salesStream,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            final sales = snapshot.data ?? [];
-            if (sales.isEmpty) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(48),
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.receipt_long_outlined,
-                        size: 60,
-                        color: Colors.grey.shade300,
-                      ),
-                      const SizedBox(height: 12),
-                      const Text(
-                        'No transactions yet',
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }
-            return Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.grey.shade100),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Recent Sales',
+              style: TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.w900,
+                color: Colors.grey.shade900,
               ),
-              child: ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: sales.length,
-                separatorBuilder: (_, __) =>
-                    Divider(height: 1, color: Colors.grey.shade50),
-                itemBuilder: (context, index) => _buildSaleTile(sales[index]),
+            ),
+            StreamBuilder<List<Sale>>(
+              stream: viewModel.salesStream,
+              builder: (context, snapshot) {
+                final sales = snapshot.data ?? [];
+                return Row(
+                  children: [
+                    if (viewModel.filterDate != null)
+                      IconButton(
+                        onPressed: () => viewModel.setFilterDate(null),
+                        icon: const Icon(
+                          Icons.close_rounded,
+                          color: Colors.red,
+                        ),
+                        tooltip: 'Clear Filter',
+                      ),
+                    IconButton(
+                      onPressed: () async {
+                        final date = await showDatePicker(
+                          context: context,
+                          initialDate: viewModel.filterDate ?? DateTime.now(),
+                          firstDate: DateTime(2020),
+                          lastDate: DateTime.now(),
+                        );
+                        if (date != null) {
+                          viewModel.setFilterDate(date);
+                        }
+                      },
+                      icon: Icon(
+                        Icons.calendar_month_rounded,
+                        color: viewModel.filterDate != null
+                            ? const Color(0xFF6366F1)
+                            : null,
+                      ),
+                      tooltip: 'Filter by Date',
+                    ),
+                    IconButton(
+                      onPressed: sales.isEmpty
+                          ? null
+                          : () => ReportService.generateSalesReportPDF(sales),
+                      icon: const Icon(Icons.picture_as_pdf_rounded),
+                      tooltip: 'Export PDF',
+                      color: Colors.red.shade700,
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          viewModel.filterDate == null
+              ? 'Latest transactions history.'
+              : 'Transactions on ${DateFormat('MMM dd, yyyy').format(viewModel.filterDate!)}',
+          style: TextStyle(color: Colors.grey.shade600),
+        ),
+        const SizedBox(height: 24),
+        Expanded(child: _buildSalesList(context, viewModel)),
+      ],
+    ),
+  );
+}
+
+// ── Mobile Sales History (no Expanded, uses shrinkWrap) ────────
+Widget _buildSalesHistoryMobile(
+  BuildContext context,
+  SalesViewModel viewModel,
+) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text(
+            'Recent Sales',
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900),
+          ),
+          StreamBuilder<List<Sale>>(
+            stream: viewModel.salesStream,
+            builder: (context, snapshot) {
+              final sales = snapshot.data ?? [];
+              return Row(
+                children: [
+                  IconButton(
+                    onPressed: () async {
+                      final date = await showDatePicker(
+                        context: context,
+                        initialDate: viewModel.filterDate ?? DateTime.now(),
+                        firstDate: DateTime(2020),
+                        lastDate: DateTime.now(),
+                      );
+                      if (date != null) {
+                        viewModel.setFilterDate(date);
+                      }
+                    },
+                    icon: Icon(
+                      Icons.calendar_month_rounded,
+                      color: viewModel.filterDate != null
+                          ? const Color(0xFF6366F1)
+                          : null,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: sales.isEmpty
+                        ? null
+                        : () => ReportService.generateSalesReportPDF(sales),
+                    icon: const Icon(
+                      Icons.picture_as_pdf_rounded,
+                      color: Colors.red,
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+      if (viewModel.filterDate != null)
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8.0),
+          child: Chip(
+            label: Text(
+              DateFormat('MMM dd, yyyy').format(viewModel.filterDate!),
+            ),
+            onDeleted: () => viewModel.setFilterDate(null),
+            deleteIcon: const Icon(Icons.close_rounded, size: 14),
+          ),
+        ),
+      const SizedBox(height: 8),
+      StreamBuilder<List<Sale>>(
+        stream: viewModel.salesStream,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          final sales = snapshot.data ?? [];
+          if (sales.isEmpty) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(48),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.receipt_long_outlined,
+                      size: 60,
+                      color: Colors.grey.shade300,
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'No transactions yet',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  ],
+                ),
               ),
             );
-          },
-        ),
-      ],
-    );
-  }
-
-  // ── Scrollable list for desktop ─────────────────────────────────
-  Widget _buildSalesList(BuildContext context, SalesViewModel viewModel) {
-    return StreamBuilder<List<Sale>>(
-      stream: viewModel.salesStream,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        final sales = snapshot.data ?? [];
-        if (sales.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.receipt_long_outlined,
-                  size: 72,
-                  color: Colors.grey.shade300,
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'No transactions yet',
-                  style: TextStyle(color: Colors.grey, fontSize: 17),
-                ),
-              ],
+          }
+          return Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Colors.grey.shade100),
             ),
-          );
-        }
-        return Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.grey.shade100),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(20),
             child: ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
               itemCount: sales.length,
               separatorBuilder: (_, __) =>
                   Divider(height: 1, color: Colors.grey.shade50),
-              itemBuilder: (context, index) => _buildSaleTile(sales[index]),
+              itemBuilder: (context, index) =>
+                  _buildSaleTile(context, viewModel, sales[index]),
             ),
+          );
+        },
+      ),
+    ],
+  );
+}
+
+// ── Scrollable list for desktop ─────────────────────────────────
+Widget _buildSalesList(BuildContext context, SalesViewModel viewModel) {
+  return StreamBuilder<List<Sale>>(
+    stream: viewModel.salesStream,
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      final sales = snapshot.data ?? [];
+      if (sales.isEmpty) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.receipt_long_outlined,
+                size: 72,
+                color: Colors.grey.shade300,
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'No transactions yet',
+                style: TextStyle(color: Colors.grey, fontSize: 17),
+              ),
+            ],
           ),
         );
-      },
-    );
-  }
-
-  Widget _buildSaleTile(Sale sale) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      leading: Container(
-        padding: const EdgeInsets.all(10),
+      }
+      return Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF10B981).withOpacity(0.1),
-          borderRadius: BorderRadius.circular(12),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.grey.shade100),
         ),
-        child: const Icon(Icons.receipt_long_rounded, color: Color(0xFF10B981)),
-      ),
-      title: Text(
-        sale.productName,
-        style: const TextStyle(fontWeight: FontWeight.w700),
-      ),
-      subtitle: Text(
-        DateFormat('MMM dd, yyyy • hh:mm a').format(sale.timestamp),
-        style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
-      ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'Rs.${sale.totalPrice.toStringAsFixed(0)}',
-            style: const TextStyle(
-              fontWeight: FontWeight.w900,
-              fontSize: 16,
-              color: Color(0xFF1E293B),
-            ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: ListView.separated(
+            itemCount: sales.length,
+            separatorBuilder: (_, __) =>
+                Divider(height: 1, color: Colors.grey.shade50),
+            itemBuilder: (context, index) =>
+                _buildSaleTile(context, viewModel, sales[index]),
           ),
-          const SizedBox(width: 4),
-          IconButton(
-            icon: const Icon(
-              Icons.print_outlined,
-              size: 18,
-              color: Color(0xFF6366F1),
-            ),
-            onPressed: () => ReportService.printReceipt(sale),
-            tooltip: 'Print Receipt',
-          ),
-        ],
-      ),
-    );
-  }
+        ),
+      );
+    },
+  );
+}
 
-  Widget _summaryRow(
-    String label,
-    String value, {
-    Color? color,
-    bool large = false,
-  }) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+Widget _buildSaleTile(
+  BuildContext context,
+  SalesViewModel viewModel,
+  Sale sale,
+) {
+  return ListTile(
+    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+    leading: Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: const Color(0xFF10B981).withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: const Icon(Icons.receipt_long_rounded, color: Color(0xFF10B981)),
+    ),
+    title: Text(
+      sale.productName,
+      style: const TextStyle(fontWeight: FontWeight.w700),
+    ),
+    subtitle: Text(
+      DateFormat('MMM dd, yyyy • hh:mm a').format(sale.timestamp),
+      style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+    ),
+    trailing: Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: color ?? Colors.grey.shade700,
-            fontWeight: large ? FontWeight.bold : FontWeight.normal,
-            fontSize: large ? 16 : 14,
-          ),
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              'Rs.${sale.totalPrice.toStringAsFixed(0)}',
+              style: const TextStyle(
+                fontWeight: FontWeight.w900,
+                fontSize: 16,
+                color: Color(0xFF1E293B),
+              ),
+            ),
+            Text(
+              'Qty: ${sale.quantitySold}',
+              style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+            ),
+          ],
         ),
-        Text(
-          value,
-          style: TextStyle(
-            color: color ?? const Color(0xFF1E293B),
-            fontWeight: FontWeight.w700,
-            fontSize: large ? 20 : 14,
+        const SizedBox(width: 8),
+        IconButton(
+          icon: const Icon(
+            Icons.print_outlined,
+            size: 20,
+            color: Color(0xFF6366F1),
           ),
+          onPressed: () => ReportService.printReceipt(sale),
+          tooltip: 'Print Receipt',
+        ),
+        IconButton(
+          icon: const Icon(Icons.delete_outline, size: 20, color: Colors.red),
+          onPressed: () async {
+            final confirm = await showDialog<bool>(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: const Text('Delete Sale'),
+                content: const Text(
+                  'Are you sure you want to delete this sale record? The stock will be restored.',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: const Text('Cancel'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    style: TextButton.styleFrom(foregroundColor: Colors.red),
+                    child: const Text('Delete'),
+                  ),
+                ],
+              ),
+            );
+
+            if (confirm == true) {
+              final error = await viewModel.deleteSale(sale);
+              if (error != null && context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(error), backgroundColor: Colors.red),
+                );
+              }
+            }
+          },
+          tooltip: 'Delete Sale',
         ),
       ],
-    );
-  }
+    ),
+  );
+}
+
+Widget _summaryRow(
+  String label,
+  String value, {
+  Color? color,
+  bool large = false,
+}) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Text(
+        label,
+        style: TextStyle(
+          color: color ?? Colors.grey.shade700,
+          fontWeight: large ? FontWeight.bold : FontWeight.normal,
+          fontSize: large ? 16 : 14,
+        ),
+      ),
+      Text(
+        value,
+        style: TextStyle(
+          color: color ?? const Color(0xFF1E293B),
+          fontWeight: FontWeight.w700,
+          fontSize: large ? 20 : 14,
+        ),
+      ),
+    ],
+  );
 }

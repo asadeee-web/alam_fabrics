@@ -80,7 +80,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => MainViewModel()),
       ],
       child: MaterialApp(
-        title: 'Alam Fabrics Management',
+        title: 'Alam&sons fabrics shop',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         home: const AuthWrapper(),

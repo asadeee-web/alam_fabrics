@@ -23,7 +23,7 @@ class ReportService {
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
                 pw.Text(
-                  'Alam Fabrics - Sales Report',
+                  'Alam&sons fabrics shop - Sales Report',
                   style: pw.TextStyle(
                     fontSize: 24,
                     fontWeight: pw.FontWeight.bold,
@@ -152,7 +152,7 @@ class ReportService {
           crossAxisAlignment: pw.CrossAxisAlignment.center,
           children: [
             pw.Text(
-              'ALAM FABRICS',
+              'Alam&sons fabrics shop',
               style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold),
             ),
             pw.Text('Main Bazar, City Name'),

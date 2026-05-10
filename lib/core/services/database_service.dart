@@ -44,11 +44,36 @@ class DatabaseService {
     await _db.collection('products').doc(id).delete();
   }
 
+  // Delete Sale and restore stock
+  Future<String?> deleteSale(Sale sale) async {
+    try {
+      await _db.runTransaction((transaction) async {
+        DocumentReference productRef = _db.collection('products').doc(sale.productId);
+        DocumentReference saleRef = _db.collection('sales').doc(sale.id);
+
+        // Get current product data
+        DocumentSnapshot productDoc = await transaction.get(productRef);
+        if (productDoc.exists) {
+          double currentQty = (productDoc.get('quantity') ?? 0).toDouble();
+          // Add back the quantity sold
+          transaction.update(productRef, {'quantity': currentQty + sale.quantitySold});
+        }
+
+        // Delete the sale record
+        transaction.delete(saleRef);
+      });
+      return null;
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
   // Record Sale (with Transaction)
   Future<String?> recordSale(
     Product product,
     double quantitySold, {
     String? customerName,
+    DateTime? customDate,
   }) async {
     if (quantitySold > product.quantity) {
       return "Not enough stock available!";
@@ -87,7 +112,7 @@ class DatabaseService {
           'sellingPrice': product.sellingPrice,
           'totalPrice': totalPrice,
           'profit': profit,
-          'timestamp': FieldValue.serverTimestamp(),
+          'timestamp': customDate != null ? Timestamp.fromDate(customDate) : FieldValue.serverTimestamp(),
         };
         transaction.set(saleRef, saleData);
       });
